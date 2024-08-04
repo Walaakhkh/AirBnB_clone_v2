@@ -1,0 +1,42 @@
+#!/usr/bin/python3
+
+import unittest
+import MySQLdb
+
+class TestDatabaseOperations(unittest.TestCase):
+    
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db', "Skipping tests for file storage")
+    def test_create_state(self):
+        # Connect to the database
+        db = MySQLdb.connect(
+            host=os.getenv('HBNB_MYSQL_HOST'),
+            user=os.getenv('HBNB_MYSQL_USER'),
+            passwd=os.getenv('HBNB_MYSQL_PWD'),
+            db=os.getenv('HBNB_MYSQL_DB')
+        )
+        cursor = db.cursor()
+
+        # Get the number of records before the operation
+        cursor.execute("SELECT COUNT(*) FROM states")
+        initial_count = cursor.fetchone()[0]
+
+        # Execute the console command to create a new state
+        os.system('echo "create State name=\'California\'" | ./console.py')
+
+        # Get the number of records after the operation
+        cursor.execute("SELECT COUNT(*) FROM states")
+        new_count = cursor.fetchone()[0]
+
+        # Assert that a new record has been added
+        self.assertEqual(new_count, initial_count + 1)
+
+        # Cleanup: Remove the test record
+        cursor.execute("DELETE FROM states WHERE name='California'")
+        db.commit()
+
+        # Close the database connection
+        cursor.close()
+        db.close()
+
+if __name__ == '__main__':
+    unittest.main()
