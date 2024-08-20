@@ -49,7 +49,8 @@ def number_template(n):
 def number_odd_or_even(n):
     """Display a HTML page with 'Number: n is even|odd' inside the H1 tag"""
     parity = "even" if n % 2 == 0 else "odd"
-    return render_template('6-number_odd_or_even.html', number=n, parity=parity)
+    return render_template('6-number_odd_or_even.html', number=n,
+            parity=parity)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
