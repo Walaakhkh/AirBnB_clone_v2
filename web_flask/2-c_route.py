@@ -6,7 +6,7 @@ The "/hbnb" route displays "HBNB".
 The "/c/<text>" route displays "C " followed by the value of the text variable
 (with underscores replaced by spaces).
 """
-from flask import Flask
+from flask import Flask, escape
 
 app = Flask(__name__)
 
