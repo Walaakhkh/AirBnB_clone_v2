@@ -24,7 +24,16 @@ class FileStorage:
         pass
 
     def reload(self):
-        # Your existing implementation
+         """Deserialize the JSON file to objects"""
+        try:
+            with open(self.__file_path, 'r') as f:
+                data = json.load(f)
+                for key, value in data.items():
+                    cls_name = key.split('.')[0]
+                    if cls_name in globals():
+                        cls = globals()[cls_name]
+                        self.__objects[key] = cls(**value)
+        except FileNotFoundError:
         pass
 
     def delete(self, obj=None):
@@ -32,4 +41,5 @@ class FileStorage:
         pass
 
     def close(self):
+        """Calls reload() to deserialize the JSON file to objects"""
         self.reload()
