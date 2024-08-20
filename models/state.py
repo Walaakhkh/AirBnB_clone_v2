@@ -5,6 +5,7 @@ from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
 
+
 class State(BaseModel, Base):
     __tablename__ = 'states'
     name = Column(String(128), nullable=False)
@@ -15,7 +16,8 @@ class State(BaseModel, Base):
         from models import storage
         if storage.__class__.__name__ == "FileStorage":
             # For file storage
-            return [city for city in storage.all(City).values() if city.state_id == self.id]
+            return [city for city in storage.all(City).values()
+                    if city.state_id == self.id]
         elif storage.__class__.__name__ == "DBStorage":
             # For DB storage
             return self.cities
