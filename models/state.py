@@ -1,23 +1,34 @@
 #!/usr/bin/python3
-from models.base_model import BaseModel
-from models.base_model import Base
-from sqlalchemy import Column, String
+""" holds class State"""
+import models
+from models.base_model import BaseModel, Base
+from models.city import City
+from os import getenv
+import sqlalchemy
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import backref
 
 
 class State(BaseModel, Base):
-    __tablename__ = 'states'
-    name = Column(String(128), nullable=False)
-    cities = relationship("City", backref="state", cascade="all, delete")
+    """Representation of state """
+    if models.storage_t == "db":
+        __tablename__ = 'states'
+        name = Column(String(128), nullable=False)
+        cities = relationship("City", backref="state")
+    else:
+        name = ""
 
-    def cities(self):
-        """ Returns a list of City objects linked to the State """
-        from models import storage
-        if storage.__class__.__name__ == "FileStorage":
-            # For file storage
-            return [city for city in storage.all(City).values()
-                    if city.state_id == self.id]
-        elif storage.__class__.__name__ == "DBStorage":
-            # For DB storage
-            return self.cities
+    def __init__(self, *args, **kwargs):
+        """initializes state"""
+        super().__init__(*args, **kwargs)
+
+    if models.storage_t != "db":
+        @property
+        def cities(self):
+            """getter for list of city instances related to the state"""
+            city_list = []
+            all_cities = models.storage.all(City)
+            for city in all_cities.values():
+                if city.state_id == self.id:
+                    city_list.append(city)
+            return city_list
