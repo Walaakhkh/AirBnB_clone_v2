@@ -1,57 +1,30 @@
-from fabric.api import env, run, put
-import os
+#!/usr/bin/python3
+"""
+Fabric script based on the file 1-pack_web_static.py that distributes an
+archive to the web servers
+"""
 
-# Define the hosts
+from fabric.api import put, run, env
+from os.path import exists
 env.hosts = ['52.87.235.32', '54.166.172.96']
 
+
 def do_deploy(archive_path):
-    """
-    Distributes an archive to the web servers and deploys it.
-    
-    Args:
-    - archive_path (str): The path to the archive to deploy.
-    
-    Returns:
-    - bool: True if all operations were successful, False otherwise.
-    """
-    if not os.path.exists(archive_path):
+    """distributes an archive to the web servers"""
+    if exists(archive_path) is False:
         return False
-
     try:
-        # Extract file name from archive_path
-        file_name = os.path.basename(archive_path)
-        no_ext = file_name.split(".")[0]
-        
-        # Define remote paths
-        remote_tmp_path = f"/tmp/{file_name}"
-        release_dir = f"/data/web_static/releases/{no_ext}/"
-
-        # Upload the archive to the /tmp/ directory on the web server
-        put(archive_path, remote_tmp_path)
-
-        # Create the directory to uncompress the archive
-        run(f"mkdir -p {release_dir}")
-
-        # Uncompress the archive to the folder
-        run(f"tar -xzf {remote_tmp_path} -C {release_dir}")
-
-        # Remove the archive from the web server
-        run(f"rm {remote_tmp_path}")
-
-        # Move the content out of the web_static folder
-        run(f"mv {release_dir}web_static/* {release_dir}")
-
-        # Delete the web_static folder
-        run(f"rm -rf {release_dir}web_static")
-
-        # Delete the symbolic link
-        run("rm -rf /data/web_static/current")
-
-        # Create a new symbolic link
-        run(f"ln -s {release_dir} /data/web_static/current")
-
-        print("New version deployed!")
+        file_n = archive_path.split("/")[-1]
+        no_ext = file_n.split(".")[0]
+        path = "/data/web_static/releases/"
+        put(archive_path, '/tmp/')
+        run('mkdir -p {}{}/'.format(path, no_ext))
+        run('tar -xzf /tmp/{} -C {}{}/'.format(file_n, path, no_ext))
+        run('rm /tmp/{}'.format(file_n))
+        run('mv {0}{1}/web_static/* {0}{1}/'.format(path, no_ext))
+        run('rm -rf {}{}/web_static'.format(path, no_ext))
+        run('rm -rf /data/web_static/current')
+        run('ln -s {}{}/ /data/web_static/current'.format(path, no_ext))
         return True
-    except Exception as e:
-        print(f"Deployment failed: {e}")
+    except:
         return False
